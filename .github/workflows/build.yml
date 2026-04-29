@@ -31,6 +31,13 @@ jobs:
           gettext git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev \
           file wget subversion patch swig libpython3-dev qemu-utils tmate
 
+          wget -O - https://kitware.com 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+          echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://kitware.com jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y cmake
+          
+          cmake --version
+
       - name: Feeds & SSH
         run: |
           set -e
