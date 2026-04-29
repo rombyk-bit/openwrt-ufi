@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: lkiuyu/openwrt-ufi
-          ref: master # У lkiuyu основная ветка master
 
       - name: Space Cleanup
         run: |
