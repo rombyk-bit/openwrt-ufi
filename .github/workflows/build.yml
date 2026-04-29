@@ -24,7 +24,8 @@ jobs:
           sudo docker image prune -a -f
 
       - name: Install Tools
-        run: |
+        run: | 
+          set -e
           sudo apt-get update
           sudo apt-get install -y build-essential clang flex bison g++ gawk \
           gettext git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev \
@@ -32,6 +33,7 @@ jobs:
 
       - name: Feeds & SSH
         run: |
+          set -e
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
