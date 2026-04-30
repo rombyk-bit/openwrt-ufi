@@ -40,6 +40,15 @@ jobs:
       - name: Verify CMake
         run: cmake --version
         
+      - name: Hard Patch CMake
+        run: |
+          # Этот блок принудительно правит все конфиги, даже если они перекачались
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          find ./feeds/ -name CMakeLists.txt -exec sed -i 's/3.31/3.29/g' {} +
+          find ./feeds/ -name CMakeLists.txt -exec sed -i 's/3.30/3.29/g' {} +
+          # Проверяем, что патч применился к проблемному пакету
+          grep "cmake_minimum_required" feeds/luci/libs/rpcd-mod-luci/CMakeLists.txt || echo "File not found yet"
           
 
       - name: Feeds & SSH
