@@ -6,7 +6,7 @@ on:
       ssh:
         description: 'Включить SSH для ручного menuconfig?'
         required: false
-        default: 'false'
+        default: 'true'
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential clang flex bison g++ gawk gettext git \
           libncurses5-dev libssl-dev python3-distutils python3-pip rsync unzip zlib1g-dev \
-          file wget subversion patch swig libpython3-dev qemu-utils tmate
+          file wget subversion patch swig libpython3-dev qemu-utils tmate python3-pip
           
           # Установка последней версии CMake через Python пакетный менеджер
           pip3 install --user cmake
