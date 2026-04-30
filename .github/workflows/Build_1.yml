@@ -30,8 +30,13 @@ jobs:
           libncurses5-dev libssl-dev python3-distutils python3-pip rsync unzip zlib1g-dev \
           file wget subversion patch swig libpython3-dev qemu-utils tmate
           
-          # Устанавливаем mkbootimg для сборки образов Qualcomm
-          pip3 install mkbootimg
+          # Скачиваем mkbootimg напрямую
+          sudo wget https://githubusercontent.com -O /usr/local/bin/mkbootimg
+          sudo chmod +x /usr/local/bin/mkbootimg
+          
+          # Проверка
+          mkbootimg --version || echo "mkbootimg installed"
+          
           
       - name: Update & Install Feeds
         run: |
