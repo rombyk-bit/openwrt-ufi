@@ -28,14 +28,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential clang flex bison g++ gawk gettext git \
           libncurses5-dev libssl-dev python3-distutils python3-pip rsync unzip zlib1g-dev \
-          file wget subversion patch swig libpython3-dev qemu-utils tmate
-          
-          # Скачиваем mkbootimg напрямую
+          file wget subversion patch swig libpython3-dev qemu-utils tmate python3
+
+          # Скачиваем mkbootimg по ПРАВИЛЬНОМУ адресу
           sudo wget https://githubusercontent.com -O /usr/local/bin/mkbootimg
           sudo chmod +x /usr/local/bin/mkbootimg
           
-          # Проверка
-          mkbootimg --version || echo "mkbootimg installed"
+          # Проверка установки
+          ls -l /usr/local/bin/mkbootimg
           
           
       - name: Update & Install Feeds
