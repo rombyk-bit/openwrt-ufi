@@ -6,7 +6,7 @@ on:
       ssh:
         description: 'Включить SSH для ручного menuconfig?'
         required: false
-        default: 'true'
+        default: 'false'
 
 jobs:
   build:
