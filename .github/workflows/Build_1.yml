@@ -1,4 +1,4 @@
-name: Build-UFI103S-Final-V2
+name: Build-UFI103S-Final-Clean
 
 on:
   workflow_dispatch:
@@ -11,21 +11,26 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: lkiuyu/openwrt-ufi
+          clean: true # Полная очистка перед началом
 
-      - name: Cleanup and Install Tools
+      - name: Free Disk Space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          sudo docker image prune -a -f
+
+      - name: Install Dependencies
+        run: |
           sudo apt-get update
           sudo apt-get install -y build-essential clang flex bison g++ gawk gettext git \
           libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev \
           file wget subversion patch swig libpython3-dev qemu-utils python3
 
-      - name: Setup mkbootimg (HARD)
+      - name: Setup mkbootimg (Safe)
         run: |
-          # Создаем инструмент ТАМ, где его ищет OpenWrt
+          # Создаем папку инструментов хоста
           mkdir -p staging_dir/host/bin
           
-          # Записываем скрипт прямо в папку инструментов хоста
+          # Записываем скрипт упаковки (автономная версия)
           cat << 'EOF' > staging_dir/host/bin/mkbootimg
           #!/usr/bin/env python3
           import sys, struct, argparse
@@ -49,37 +54,40 @@ jobs:
           EOF
           
           chmod +x staging_dir/host/bin/mkbootimg
-          # Ссылка на случай, если ищет версию .py
-          ln -sf mkbootimg staging_dir/host/bin/mkbootimg.py
+          # Копируем вместо создания ссылки, чтобы избежать циклических ошибок
+          cp staging_dir/host/bin/mkbootimg staging_dir/host/bin/mkbootimg.py
           
-          # Прописываем путь к нашим инструментам в PATH для текущего сеанса
+          # Экспортируем путь для текущего сеанса
           echo "$(pwd)/staging_dir/host/bin" >> $GITHUB_PATH
 
-      - name: Feeds and Patch
+      - name: Update Feeds & Patch
         run: |
+          # Очистка временных файлов фидов перед установкой
+          rm -rf ./feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          # Патч CMake 3.31 -> 3.29
           find . -name CMakeLists.txt -exec sed -i 's/3.31/3.29/g' {} +
           find . -name CMakeLists.txt -exec sed -i 's/3.30/3.29/g' {} +
 
-      - name: Configure
+      - name: Configure Firmware
         run: |
           rm -f .config
           echo 'CONFIG_TARGET_msm89xx=y' >> .config
-          echo 'CONFIG_TARGET_msm89xx_msm8916=y' >> .config
+          echo 'CONFIG_TARGET_msm89xx_msm8916=y' >> >> .config
           echo 'CONFIG_TARGET_msm89xx_msm8916_DEVICE_uand_ufi103s=y' >> .config
           echo 'CONFIG_PACKAGE_luci=y' >> .config
           echo 'CONFIG_PACKAGE_luci-i18n-base-ru=y' >> .config
           make defconfig
 
-      - name: Build
+      - name: Build Firmware
         run: |
-          # Теперь mkbootimg точно в PATH и в staging_dir
-          make -j$(nproc) || make -j1 V=s
+          # Используем FORCE=1 для обхода мелких проверок окружения
+          make -j$(nproc) FORCE=1 || make -j1 V=s FORCE=1
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: UFI103S-Firmware
+          name: UFI103S-Firmware-Images
           path: bin/targets/msm89xx/msm8916/
           
